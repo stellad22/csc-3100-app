@@ -3,6 +3,8 @@ import express from "express";
 const app = express();
 const port = 8000;
 
+app.use(express.json());
+
 const users = {
   users_list: [
     {
@@ -30,11 +32,30 @@ const users = {
       name: "Dennis",
       job: "Bartender",
     },
+    {
+      "id": "qwe123",
+      "job": "Zookeeper",
+      "name": "Cindy",   
+    },
   ],
 };
 
+
 const findUserById = (id) =>
-  users["users_list"].find((user) => user["id"] === id);
+    users["users_list"].filter((user) => user["id"] === id);
+const findUserByNameAndJob = (name, job) =>
+    users["users_list"].filter((user) => user["name"] === name && user["job"] === job);
+
+const addUser = (user) => {
+  users["users_list"].push(user);
+  return user;
+};
+
+app.post("/users", (req, res) => {
+  const userToAdd = req.body;
+  addUser(userToAdd);
+  res.send();
+});
 
 app.get("/users/:id", (req, res) => {
   const id = req.params["id"]; //or req.params.id
@@ -46,7 +67,27 @@ app.get("/users/:id", (req, res) => {
   }
 });
 
-app.use(express.json());
+app.get("/users", (req, res) => {
+  const name = req.query.name;
+  const job = req.query.job;  //or req.params.id
+  
+  if (name !== undefined && job !== undefined) {
+    let result = findUserByNameAndJob(name, job);
+    if (name !== undefined && job !== undefined) {
+        let result = findUserByNameAndJob(name, job);
+        res.send(result);
+    }
+    } else {
+        res.status(400).send("Bad Request");
+    }
+});
+
+app.delete("/users/:id", (req, res) => {
+  const id = req.params["id"];
+  users["users_list"] = users["users_list"].filter((user) => user["id"] !== id);
+  res.send();
+});
+
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
