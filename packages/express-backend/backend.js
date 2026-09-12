@@ -43,6 +43,10 @@ const users = {
 
 const findUserById = (id) =>
     users["users_list"].filter((user) => user["id"] === id);
+
+const findUserByName = (name) =>
+    users["users_list"].filter((user) => user["name"] === name);
+
 const findUserByNameAndJob = (name, job) =>
     users["users_list"].filter((user) => user["name"] === name && user["job"] === job);
 
@@ -51,35 +55,41 @@ const addUser = (user) => {
   return user;
 };
 
-app.post("/users", (req, res) => {
-  const userToAdd = req.body;
-  addUser(userToAdd);
-  res.send();
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+
+app.get("/users", (req, res) => {
+  const name = req.query.name;
+  const job = req.query.job;  //or req.params.id
+    if (name !== undefined && job !== undefined) {
+        let result = findUserByNameAndJob(name, job);
+        res.send(result);
+    }
+    else if(name !== undefined) {
+        let result = findUserByName(name);
+        res.send(result);
+    }
+    else {
+        res.send(users);
+    }
 });
 
 app.get("/users/:id", (req, res) => {
   const id = req.params["id"]; //or req.params.id
   let result = findUserById(id);
-  if (result === undefined) {
+  if (result.length === 0) {
     res.status(404).send("Resource not found.");
   } else {
     res.send(result);
   }
 });
 
-app.get("/users", (req, res) => {
-  const name = req.query.name;
-  const job = req.query.job;  //or req.params.id
-  
-  if (name !== undefined && job !== undefined) {
-    let result = findUserByNameAndJob(name, job);
-    if (name !== undefined && job !== undefined) {
-        let result = findUserByNameAndJob(name, job);
-        res.send(result);
-    }
-    } else {
-        res.status(400).send("Bad Request");
-    }
+app.post("/users", (req, res) => {
+  const userToAdd = req.body;
+  addUser(userToAdd);
+  res.send();
 });
 
 app.delete("/users/:id", (req, res) => {
@@ -88,10 +98,6 @@ app.delete("/users/:id", (req, res) => {
   res.send();
 });
 
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
