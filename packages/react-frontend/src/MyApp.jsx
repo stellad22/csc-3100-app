@@ -22,20 +22,44 @@ function MyApp() {
   }, []);
   
   function removeOneCharacter(index) {
-    const updated = characters.filter((character, i) => {
-      return i !== index;
-    });
-    setCharacters(updated);
+    const character = characters[index]; 
+
+    deleteUser(character.id)
+    .then((response) => {
+      if (response.status === 204){
+        const newList = characters.filter((c, i) => i !== index); 
+        setCharacters(newList);
+      }else if (response.status === 404){
+        console.log("User not found")
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    })
   }
 
  function updateList(person) {
   postUser(person)
-    .then(() => setCharacters([...characters, person]))
+    .then((response) => {
+      if (response.status !== 201){
+        throw new Error('Response status: ${response.status}')
+      }
+      return response.json(); 
+    })
+    .then((newUserFromServer) => {
+      setCharacters([...characters, newUserFromServer]);
+    })
     .catch((error) => {
       console.log(error);
     });
 }
 
+function deleteUser(id) {
+  const promise = fetch(`http://localhost:8000/users/${id}`, {
+    method: "DELETE",
+  });
+  return promise;
+}
   function postUser(person) {
   const promise = fetch("Http://localhost:8000/users", {
     method: "POST",
