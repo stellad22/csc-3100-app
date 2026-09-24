@@ -24,7 +24,7 @@ function MyApp() {
   function removeOneCharacter(index) {
     const character = characters[index]; 
 
-    deleteUser(character.id)
+    deleteUser(character._id)
     .then((response) => {
       if (response.status === 204){
         const newList = characters.filter((c, i) => i !== index); 
@@ -58,17 +58,6 @@ function deleteUser(id) {
   const promise = fetch(`http://localhost:8000/users/${id}`, {
     method: "DELETE",
   });
-  return promise;
-}
-  function postUser(person) {
-  const promise = fetch("Http://localhost:8000/users", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(person),
-  });
-
   return promise;
 }
 
